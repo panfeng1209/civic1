@@ -6,28 +6,31 @@ on:
 #   schedule:
 #         - cron: '*/40 * * * * ' # 每40分钟运行一次
 jobs:
-  build_on_win:
-    runs-on: windows-2019  # ubuntu-16.04 macos-10.15 windows-2019
+  build_on_linux_16:
+    runs-on: ubuntu-16.04
     timeout-minutes: 30
     strategy:
       matrix:
-        node-version: [10.x, 11.x, 13.x]
+        node-version: [10.x, 11.x, 14.x]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@master
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm install
-    - run: node master
-  build_on_linux:
+    - run: node index github
+  build_on_linux_18:
     runs-on: ubuntu-18.04
     timeout-minutes: 30
+    strategy:
+      matrix:
+        node-version: [10.x]
     steps:
     - uses: actions/checkout@master
       with:
-        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+        persist-credentials: false 
+        fetch-depth: 0
     - name: Create local changes
       run: |
         echo "update" >> log1.log
@@ -41,3 +44,10 @@ jobs:
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@master
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install
+    - run: node index github
